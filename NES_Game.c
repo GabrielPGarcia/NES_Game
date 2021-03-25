@@ -75,9 +75,9 @@ void main(void)
 {
 
    //show_title_screen(Title_Screen_pal, Title_Screen_rle);
-   //show_title_screen(Level_1E_pal, Level_1E_rle);
+   show_title_screen(Level_1E_pal, Level_1E_rle);
    //show_title_screen(Level_2E_pal, Level_2E_rle);
-   show_title_screen(Level_3E_pal, Level_3E_rle);
+   //show_title_screen(Level_3E_pal, Level_3E_rle);
   
   // infinite loop
   while(1) {
