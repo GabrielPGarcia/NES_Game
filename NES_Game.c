@@ -191,17 +191,21 @@ void Level_one(const byte* pal, const byte* rle,const byte* rle2) {
 void Start()
 {
   ppu_off();
-  vram_adr(NTADR_A(7,15));
-  vram_write("Around The planets", 18);
+  vram_adr(NTADR_A(7,9));
+  vram_write("Air Conbat Chopper", 18);
   
-  vram_adr(NTADR_A(10,17));
+  vram_adr(NTADR_A(10,12));
   vram_write("[A] to start!", 12);
   ppu_on_all();
 }
+
 void main(void)
 {
   int InGame = 0;  
   int GameState = 1;
+  int x = 0;   // x scroll position
+  int y = 0;   // y scroll position
+  int dx = 1;  // y scroll direction
    //show_title_screen(Title_Screen_pal, Title_Screen_rle);
    //show_title_screen(Level_1E_pal, Level_1E_rle);
    //show_title_screen(Level_2E_pal, Level_2E_rle);
@@ -225,7 +229,12 @@ void main(void)
         game_loop();
         break;
       case 2: 
-        show_title_screen(Level_1E_pal, Level_1E_rle);
+        
+        show_title_screen(Level_1E_pal, Level_1E_rle);           
+        oam_id = 0;    
+        x += dx;
+        scroll(x, y);      
+        game_loop(); 
         InGame = 1;
 	break;
       case 3: 
