@@ -416,7 +416,7 @@ void main(void)
         break;
       case 2: 
         
-        show_title_screen(Level_1E_pal, Level_1E_rle);
+        show_title_screen(Level_3E_pal, Level_1E_rle);
         setup_Shout();
         //oam_id = 0;
         enemy_setup();
