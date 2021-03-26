@@ -4,7 +4,7 @@
 
 ;;{pal:"nes",layout:"nes"};;
 _Title_Screen_pal:
- .byte $0F,$00,$0F,$19,$1C,$0A,$31,$1C
+ .byte $0F,$00,$2B,$19,$1C,$0A,$31,$1C
  .byte $1C,$28,$38,$28,$1C,$09,$19,$29
  
 ;;

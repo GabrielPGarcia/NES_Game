@@ -36,6 +36,8 @@ extern const byte Level_3E_rle[];
 //#link "Level_2E.s"
 //#link "Level_3E.s"
 #define NUM_ACTORS 1
+
+
 #define DEF_METASPRITE_2x2(name,code,pal)\
 const unsigned char name[]={\
   0,0, (code)+0, pal, \
@@ -44,13 +46,7 @@ const unsigned char name[]={\
   8,8, (code)+3, pal,\
   128\
 };
-#define DEF_METASPRITE_2x2_FLIP(name,code,pal)\
-const unsigned char name[]={\
-        8,      0,      (code)+0,   (pal)|OAM_FLIP_H, \
-        8,      8,      (code)+1,   (pal)|OAM_FLIP_H, \
-        0,      0,      (code)+2,   (pal)|OAM_FLIP_H, \
-        0,      8,      (code)+3,   (pal)|OAM_FLIP_H, \
-        128};
+
 const char PALETTE[32] = { 
   0x99,			// screen color
 
@@ -64,19 +60,14 @@ const char PALETTE[32] = {
 };
 //-----------------Player's sprite--------
 
-DEF_METASPRITE_2x2(playerRStand, 0xd8, 0);
+DEF_METASPRITE_2x2(playerRRun0, 0xd8, 0);
 DEF_METASPRITE_2x2(playerRRun1, 0xdc, 0);
 DEF_METASPRITE_2x2(playerRRun2, 0xe0, 0);
 DEF_METASPRITE_2x2(playerRRun3, 0xe4, 0);
-DEF_METASPRITE_2x2_FLIP(playerLStand, 0xd8, 0);
-DEF_METASPRITE_2x2_FLIP(playerLRun1, 0xdc, 0);
-DEF_METASPRITE_2x2_FLIP(playerLRun2, 0xe0, 0);
-DEF_METASPRITE_2x2_FLIP(playerLRun3, 0xe4, 0);
 
-const unsigned char* const playerRunSeq[16] = 
+const unsigned char* const playerRunSeq[8] = 
 {
-  playerLRun1, playerLRun2, playerLRun3, playerLRun1, playerLRun2, playerLRun3, 
-  playerLRun1, playerLRun2, playerRRun1, playerRRun2, playerRRun3, 
+  playerRRun1, playerRRun2, playerRRun3, 
   playerRRun1, playerRRun2, playerRRun3, playerRRun1, playerRRun2  
 };
 
@@ -84,22 +75,14 @@ byte actor_x[NUM_ACTORS];
 byte actor_y[NUM_ACTORS];
 sbyte actor_dx[NUM_ACTORS];
 sbyte actor_dy[NUM_ACTORS];
+
+
 int i;
 char pad;
 char oam_id;
 byte runseq;
-word x_scroll;		// X scroll amount in pixels
-byte seg_height;	// segment height in metatiles
-byte seg_width;		// segment width in metatiles
-byte seg_char;		// character to draw
-byte seg_palette;	// attribute table value
-// number of rows in scrolling playfield (without status bar)
-#define PLAYROWS 24
-// a vertical slice of attribute table entries
-char attrbuf[PLAYROWS/4];
-// buffers that hold vertical slices of nametable data
-char ntbuf1[PLAYROWS];	// left side
-char ntbuf2[PLAYROWS];	// right side
+int lad=0;
+int iRand;
 
 typedef struct Actor {
   word yy;		// Y position in pixels (16 bit)
@@ -108,12 +91,18 @@ typedef struct Actor {
   byte state;		// ActorState
   int onscreen:1;	// is actor onscreen?
 } Actor;
-
+typedef struct Shouts {
+  byte x;		// X position in pixels (8 bit)
+  byte y;		// X position in pixels (8 bit)
+  byte state;		// ActorState
+} Shouts;
+Shouts shout[9];
 Actor actors;	// all actors
+int ifShout = 0;
 int playerp;
 void actors_setup()
 {
-  actor_x[0] = 100;
+  actor_x[0] = 50;
   actor_y[0] = 100;
   actor_dx[0] = 0;
   actor_dy[0] = 1;
@@ -126,11 +115,80 @@ void setup_graphics() {
   pal_all(PALETTE);
   ppu_on_all();
 }
+void playerShout(int i)
+{
+  if(i = 1)
+  {
+    shout[0].x = actor_x[0]+1;
+    shout[0].y = actor_y[0]+1;
+    shout[0].state = 29;
+    oam_id = oam_spr(shout[0].x, shout[0].y, shout[0].state, 4, oam_id);
+    ifShout = 1;
+  }
+}
+void ShoutUsed()
+{
+  if(ifShout == 1)
+  {
+    for(i=0;i<=20;i++)
+    {
+    shout[0].y = 1 + shout[0].y;
+    shout[0].state = 29;
+    oam_id = oam_spr(shout[0].x, shout[0].y, shout[0].state, 4, oam_id);      
+    }
+    ifShout = 0;
+    lad = 0;
+  }
+}
+//void does_missile_hit_player() {
+//  byte i;
+//  if (player_exploding)
+//    return;
+//  for (i=0; i<MAX_ATTACKERS; i++) {
+//    if (missiles[i].ypos != YOFFSCREEN && 
+//        in_rect(missiles[i].xpos, missiles[i].ypos + 16, 
+//                player_x, player_y, 16, 16)) {
+//      player_exploding = 1;
+//      break;
+//    }
+//  }
+//}
+
 void player_action()
-{ 
-  if(pad&PAD_A);
-  if (pad&PAD_UP)actor_dy[0]=-3;
-  else if (pad&PAD_DOWN)actor_dy[0]=3;
+{           
+  //byte runseq;
+  if(pad&PAD_A&lad == 1)playerShout(lad);
+  if(pad&PAD_A&lad == 2)playerShout(lad);
+  if(pad&PAD_A&lad == 3)playerShout(lad);
+  if(pad&PAD_A&lad == 4)playerShout(lad);
+
+  if (pad&PAD_UP)
+  {
+    actor_dy[0]=-3;
+    actor_y[i] += actor_dy[i];    
+    oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun0);
+    lad = 1;
+  }  
+  else if (pad&PAD_DOWN)
+  {
+    actor_dy[0]=3;  
+    actor_y[i] += actor_dy[i];
+    oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun1);
+  }     
+  else if(pad&PAD_LEFT)
+  {
+    actor_dx[0]=-3;
+    actor_x[i] += actor_dx[i];
+    oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun2);
+
+  }
+  else if (pad&PAD_RIGHT)
+  {
+    actor_dx[0]=3;    
+    actor_x[i] += actor_dx[i];
+    oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun3);
+
+  }
   //-------------wall collision----------
   if(actor_y[0] >= 25 &&  actor_y[0] != 185)
   {
@@ -140,23 +198,20 @@ void player_action()
   {
     actor_dy[0] = - actor_dy[0];
   }
-  for (i=0; i<NUM_ACTORS; i++) {
-    byte runseq = actor_y[i] & 7;
-    if (actor_dx[i] >= 0 )
-      runseq += 8;
-    oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRunSeq[runseq]);
-    actor_x[i] += actor_dx[i];
-    actor_y[i] += actor_dy[i];
- ppu_wait_frame();
-  }
+
   if (oam_id!=0) oam_hide_rest(oam_id);
 }
 
+
 //------------------main Game loop--------------
 void game_loop()
-{ 
+{
+  
   player_action();  
-  ppu_wait_frame();
+  ppu_wait_frame();     // ensure VRAM buffer is cleared
+  ppu_wait_nmi();
+  vrambuf_clear();
+  
 }
 
 void show_title_screen(const byte* pal, const byte* rle) {
@@ -221,17 +276,19 @@ void main(void)
         show_title_screen(Title_Screen_pal, Title_Screen_rle);        
         Start();        
         actors_setup();
+        //enemy_setup();
         InGame = 2;
         break;
       case 1:   
         oam_id = 0;
+        ShoutUsed();
         game_loop();
         break;
       case 2: 
         
-        show_title_screen(Level_1E_pal, Level_1E_rle);           
-        oam_id = 0;
-        game_loop();        
+        show_title_screen(Level_1E_pal, Level_1E_rle);     
+        //oam_id = 0;
+        //game_loop();        
         InGame = 1;
 	break;
       case 3: 
@@ -242,11 +299,12 @@ void main(void)
         break;
         
     }
-        x += dx;
-        scroll(x, y);   
+       // x += dx;
+        //scroll(x, y);   
     
     pad = pad_trigger(0);
-    if(pad&PAD_A){InGame = 2;}  
+    //if(pad&PAD_A){InGame = 2;}
+    
 
   }
 
