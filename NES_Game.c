@@ -211,7 +211,6 @@ void main(void)
    //show_title_screen(Level_2E_pal, Level_2E_rle);
    //show_title_screen(Level_3E_pal, Level_3E_rle);
   setup_graphics();
-
   Level_one(Level_1E_pal, Level_1E_rle,Level_2E_rle);
   // infinite loop
   while(1) 
@@ -231,10 +230,8 @@ void main(void)
       case 2: 
         
         show_title_screen(Level_1E_pal, Level_1E_rle);           
-        oam_id = 0;    
-        x += dx;
-        scroll(x, y);      
-        game_loop(); 
+        oam_id = 0;
+        game_loop();        
         InGame = 1;
 	break;
       case 3: 
@@ -245,7 +242,8 @@ void main(void)
         break;
         
     }
-    
+        x += dx;
+        scroll(x, y);   
     
     pad = pad_trigger(0);
     if(pad&PAD_A){InGame = 2;}  
