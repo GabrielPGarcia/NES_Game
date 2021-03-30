@@ -80,8 +80,9 @@ const char PALETTE[32] = {
   0x00,0x00,0x00,0x0,	// background palette 2
   0x00,0x00,0x00,0x0,   // background palette 3
 
-  0x0f,0x30,0x2d,0x0,	// sprite palette 0
-  0x0f,0xc1,0x30,0x0,	// sprite palette 0
+  0x0f,0x30,0x2d,0x0,	// sprite palette 4
+  0x00,0xc3,0x15,0x0,	// sprite palette 5
+  0x00,0x00,0x2c,0x0,	// sprite palette 6
 };
 //-----------------Player's sprite--------
 
@@ -110,6 +111,31 @@ byte enemy_y[NUM_ENEMY];
 sbyte enemy_dx[NUM_ENEMY];
 sbyte enemy_dy[NUM_ENEMY];
 
+
+
+typedef struct Actor {
+  word yy;		// Y position in pixels (16 bit)
+  byte x;		// X position in pixels (8 bit)
+  byte y;		// X position in pixels (8 bit)
+  byte state;		// ActorState
+  int onscreen:1;	// is actor onscreen?
+} Actor;
+typedef struct Objects {
+  word yy;		// Y position in pixels (16 bit)
+  byte x;		// X position in pixels (8 bit)
+  byte y;		// X position in pixels (8 bit)
+  byte state;		// ActorState
+} Objects;
+
+//---global variable---
+Objects shot[9];  	//number of bullets
+Objects lives[3];  	//number of lives 
+int pLives = 3;   	//player's lives
+int pPoints = 0;	//player's points
+int shotinaction = 0;	//shout in action
+Actor actors;	// all actors
+Actor enemy1;	// all actors
+
 int i;
 int iCount;
 char pad;
@@ -119,25 +145,6 @@ int lad=0;
 int lads=0;
 int iRand;
 
-typedef struct Actor {
-  word yy;		// Y position in pixels (16 bit)
-  byte x;		// X position in pixels (8 bit)
-  byte y;		// X position in pixels (8 bit)
-  byte state;		// ActorState
-  int onscreen:1;	// is actor onscreen?
-} Actor;
-typedef struct Shouts {
-  word yy;		// Y position in pixels (16 bit)
-  byte x;		// X position in pixels (8 bit)
-  byte y;		// X position in pixels (8 bit)
-  byte state;		// ActorState
-} Shouts;
-
-Shouts shout[9];
-Actor actors;	// all actors
-Actor enemy1;	// all actors
-int shoutinaction = 0;
-int playerp;
 
 void actors_setup()
 {
@@ -153,101 +160,117 @@ void enemy_setup()
   enemy_dx[0] = 0;
   enemy_dy[0] = 0;
 }
-// setup PPU and tables
-void setup_graphics() {
+void setup_graphics() 
+{
   ppu_off();
   oam_clear();
-  //oam_hide_rest(0);
   pal_all(PALETTE);
   ppu_on_all();
 }
-void setup_Shout()
+void Lives(int l,int k)
+{
+  
+  lives[l].x = 55+k;
+  lives[l].y = 7;
+  lives[l].state = 14;
+  oam_id = oam_spr(lives[l].x, lives[l].y, lives[l].state, 5, oam_id);
+  
+}
+void PlayersLives()
+{
+  if(pLives >= 1)
+  {
+    Lives(0,0);
+    if(pLives >= 2)
+    {
+      Lives(0,9);
+      if(pLives >= 3)
+      {
+        Lives(0,18);
+      }
+    }
+  }
+  else 
+  {
+    //if player has no lives left
+  }
+}
+//prints points to top right
+void points_count()
+{  
+  if(pPoints<=0)pPoints=0;//if points is less then 0 keep it 0
+  if(pPoints >=100) oam_id = oam_spr(218, 7, (pPoints/100%10)+48, 6, oam_id);
+  if(pPoints >=10) oam_id = oam_spr(224, 7, (pPoints/10%10)+48, 6, oam_id);
+  oam_id = oam_spr(230, 7, (pPoints%10)+48, 6, oam_id);
+
+}
+void setup_Shot()
 {
   if(lads == 1)
-    shout[0].x = actor_x[0]+8;
+    shot[0].x = actor_x[0]+8;
     if(lads == 2)
-      shout[0].x = actor_x[0] + 2;
+      shot[0].x = actor_x[0] + 2;
     if(lads == 3)
-      shout[0].y = actor_y[0];
+      shot[0].y = actor_y[0];
     if(lads == 4)
-      shout[0].y = actor_y[0]+8;
-    shout[0].state = 28;
-    oam_id = oam_spr(shout[0].x, shout[0].y, shout[0].state, 4, oam_id);
+      shot[0].y = actor_y[0]+8;
+    shot[0].state = 28;
+    oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id);
 }
-void ShoutUsed()
+void ShotUsed()
 {
   if(shoutinaction == 1 && iCount <= 50)
   {
     if(lads == 1)
     {
-      shout[0].y = shout[0].y - 2;
-      shout[0].state = 28;
-      oam_id = oam_spr(shout[0].x, shout[0].y, shout[0].state, 4, oam_id); 
+      shot[0].y = shot[0].y - 2;
+      shot[0].state = 28;
+      oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id); 
     }
     if(lads == 2)
     {
-      shout[0].y = shout[0].y + 2;
-      shout[0].state = 28;
-      oam_id = oam_spr(shout[0].x, shout[0].y, shout[0].state, 4, oam_id); 
+      shot[0].y = shot[0].y + 2;
+      shot[0].state = 28;
+      oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id); 
     }
     if(lads == 3)
     {
-      shout[0].x = shout[0].x - 2;
-      shout[0].state = 29;
-      oam_id = oam_spr(shout[0].x, shout[0].y, shout[0].state, 4, oam_id); 
+      shot[0].x = shot[0].x - 2;
+      shot[0].state = 29;
+      oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id); 
     }
     if(lads == 4)
     {
-      shout[0].x = shout[0].x + 2;
-      shout[0].state = 29;
-      oam_id = oam_spr(shout[0].x, shout[0].y, shout[0].state, 4, oam_id); 
+      shot[0].x = shot[0].x + 2;
+      shot[0].state = 29;
+      oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id); 
     }
     iCount = iCount + 1;
   }
   else if(iCount > 0)
   {
-    shoutinaction = 0;
+    shotinaction = 0;
     iCount = 0;
   }
   else 
   {    
-      shout[0].x = actor_x[0];
-      shout[0].y = actor_y[0];
-      shout[0].state = 0;
-      oam_id = oam_spr(shout[0].x, shout[0].y, shout[0].state, 4, oam_id); 
+      shot[0].x = actor_x[0];
+      shot[0].y = actor_y[0];
+      shot[0].state = 0;
+      oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id); 
   }
 
 }
-//void does_missile_hit_player() {
-//  byte i;
-//  if (player_exploding)
-//    return;
-//  for (i=0; i<MAX_ATTACKERS; i++) {
-//    if (missiles[i].ypos != YOFFSCREEN && 
-//        in_rect(missiles[i].xpos, missiles[i].ypos + 16, 
-//                player_x, player_y, 16, 16)) {
-//      player_exploding = 1;
-//      break;
-//    }
-//  }
-//}
 void enemy_action()
 { 
-  if(shoutinaction == 1)
-  {
-   if((shout[0].x >= enemy_x[0] + 15 && shout[i].x <= enemy_x[0])&& 
-       (shout[0].y >= enemy_y[0] - 15 && shout[i].y <= enemy_y[0]+15)) 
-    {
-      shout[i].state = 0;
-      enemy_setup();
-    }
-  }
+
   if( enemy_x[0]!=actor_x[0] || enemy_y[0] != actor_y[0])
   {
     if((shout[0].x >= enemy_x[0]-4 && shout[0].x <= enemy_x[0]+8)&& 
        (shout[0].y >= enemy_y[0]-2 && shout[0].y <= enemy_y[0]+4)) 
     {
       shout[i].state = 0;
+      pPoints= pPoints + 1;
       enemy_setup();
     }
     if(actor_x[0] > enemy_x[0]){
@@ -262,19 +285,26 @@ void enemy_action()
     else if(actor_y[0] < enemy_y[0]){
       enemy_y[0] = enemy_y[0] - 1;
       oam_id = oam_meta_spr(enemy_x[0], enemy_y[0], oam_id, EnemyM2U);}
+
   }
     else
   {
     //take damage
+      pLives = pLives - 1;
+      enemy_setup();
     i=0;
   }
+  PlayersLives();
 }
 void player_action()
-{           
-  if (pad&PAD_A && shoutinaction != 1){setup_Shout();shoutinaction = 1;}
+{        
+  pad = pad_poll(i);
+  //if player has shot
+  if (pad&PAD_A && shotinaction != 1){setup_Shot();shotinaction = 1;}
+  
   if (pad&PAD_UP)
   {
-    actor_dy[0]=-5;
+    actor_dy[0]=-2;
     actor_y[i] += actor_dy[i];    
     oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun0);
     lad = 1;
@@ -283,7 +313,7 @@ void player_action()
   }  
   else if (pad&PAD_DOWN)
   {
-    actor_dy[0]=5;  
+    actor_dy[0]=2;  
     actor_y[i] += actor_dy[i];
     oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun1);
     lad = 2;
@@ -292,7 +322,7 @@ void player_action()
   }     
   else if(pad&PAD_LEFT)
   {
-    actor_dx[0]=-5;
+    actor_dx[0]=-2;
     actor_x[i] += actor_dx[i];
     oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun2);
     lad = 3;
@@ -301,7 +331,7 @@ void player_action()
   }
   else if (pad&PAD_RIGHT)
   {
-    actor_dx[0]=5;    
+    actor_dx[0]=2;    
     actor_x[i] += actor_dx[i];
     oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun3);
     lad = 4;
@@ -327,6 +357,8 @@ void player_action()
   }
 
   if (oam_id!=0) oam_hide_rest(oam_id);
+  
+  points_count();
 }
 
 
@@ -370,7 +402,14 @@ void Level_one(const byte* pal, const byte* rle,const byte* rle2) {
   // enable rendering
   ppu_on_all();
 }
-
+void levelSetup()
+{
+  vram_adr(NTADR_A(1,1)); 
+  vram_write("Lives:", 6);  
+  vram_adr(NTADR_A(20,1)); 
+  vram_write("Points:", 7);
+  
+}
 
 void Start()
 {
@@ -416,8 +455,9 @@ void main(void)
         break;
       case 2: 
         
-        show_title_screen(Level_3E_pal, Level_1E_rle);
+        show_title_screen(Level_1E_pal, Level_1E_rle);
         setup_Shout();
+        levelSetup();
         //oam_id = 0;
         enemy_setup();
         //game_loop();        
