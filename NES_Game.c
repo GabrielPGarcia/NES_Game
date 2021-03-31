@@ -133,10 +133,12 @@ Objects lives[3];  	//number of lives
 Objects arrow[1];  	//arrow
 int pLives = 3;   	//player's lives
 int pPoints = 0;	//player's points
+int ikills = 0;	//player's points
 int shotinaction = 0;	//shout in action
 Actor actors;	// all actors
 Actor enemy1;	// all actors
 int InGame = 0; 
+int ilevel = 1;
 
 int i;
 int iCount;
@@ -286,6 +288,7 @@ void enemy_action()
     {
       shot[i].state = 0;
       pPoints= pPoints + 1;
+      ikills = ikills + 1;
       enemy_setup();
     }
     if(actor_x[0] > enemy_x[0]){
@@ -306,6 +309,10 @@ void enemy_action()
   {
     //take damage
       pLives = pLives - 1;
+      if(pPoints != 0)
+       pPoints= pPoints/2;
+      else
+        pPoints=0;
       enemy_setup();
     i=0;
   }
@@ -393,16 +400,26 @@ void player_action()
 }
 void nextLevel()
 {
-  if(pPoints == 0)
+  if(ikills > 50 && ilevel == 1)
   {
       arrow[0].x = 120;
       arrow[0].y = 200;
       arrow[0].state = 11;
-      oam_id = oam_spr(arrow[0].x, arrow[0].y, arrow[0].state, 5, oam_id);
+      oam_id = oam_spr(arrow[0].x, arrow[0].y, arrow[0].state, 5, oam_id);  if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
+      {InGame = 3;ilevel = 2;} 
+    
+  }  
+  if(ikills > 150 && ilevel == 2)
+  {
+      arrow[0].x = 120;
+      arrow[0].y = 200;
+      arrow[0].state = 11;
+      oam_id = oam_spr(arrow[0].x, arrow[0].y, arrow[0].state, 5, oam_id);  if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
+      {InGame = 4;ilevel = 3;} 
+    
   }
   
-  if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
-  {InGame = 3;} 
+
 }
 
 //------------------main Game loop--------------
@@ -457,10 +474,12 @@ void levelSetup()
 void Start()
 {
   ppu_off();
-  vram_adr(NTADR_A(7,9));
-  vram_write("Air Conbat Chopper", 18);
+  vram_adr(NTADR_A(15,12));
+  vram_write("The", 3);
+  vram_adr(NTADR_A(10,13));
+  vram_write("Exterminator", 12);
   
-  vram_adr(NTADR_A(10,12));
+  vram_adr(NTADR_A(10,17));
   vram_write("[A] to start!", 12);
   ppu_on_all();
 }
@@ -471,25 +490,24 @@ void main(void)
   int x = 0;   // x scroll position
   int y = 0;   // y scroll position
   int dx = 1;  // y scroll direction
-   //show_title_screen(Title_Screen_pal, Title_Screen_rle);
-   //show_title_screen(Level_1E_pal, Level_1E_rle);
-   //show_title_screen(Level_2E_pal, Level_2E_rle);
-   //show_title_screen(Level_3E_pal, Level_3E_rle);
   
   InGame = 0; 
   iCount = 0;
   setup_graphics();
   Level_one(Level_1E_pal, Level_1E_rle,Level_2E_rle);
   // infinite loop
+  show_title_screen(Title_Screen_pal, Title_Screen_rle);        
+  Start();     
   while(1) 
   {   
     switch(InGame)
     {
       case 0: 
-        show_title_screen(Title_Screen_pal, Title_Screen_rle);        
-        Start();        
+        
+         pad = pad_trigger(0);
+         if(pad&PAD_START){InGame = 2;}
         //enemy_setup();
-        InGame = 2;
+        //InGame = 2;
         break;
       case 1:   
         oam_id = 0;  
@@ -500,37 +518,32 @@ void main(void)
         
         show_title_screen(Level_1E_pal, Level_1E_rle);
         setup_Shot();
-        levelSetup();
-        
+        levelSetup();        
         actors_setup();
-        //oam_id = 0;
-        enemy_setup();
-        //game_loop();        
+        enemy_setup();    
         InGame = 1;
 	break;
       case 3:         
         show_title_screen(Level_1E_pal, Level_2E_rle);
         setup_Shot();
         levelSetup();
-        
         actors_setup();
-        //oam_id = 0;
-        enemy_setup();
-        //game_loop();        
+        enemy_setup();   
         InGame = 1;
-	break;
-
         break;
       case 4:  
-
+        show_title_screen(Level_1E_pal, Level_3E_rle);
+        setup_Shot();
+        levelSetup();        
+        actors_setup();
+        enemy_setup();     
+        InGame = 1;
         break;
         
     }
        // x += dx;
         //scroll(x, y);   
     
-    pad = pad_trigger(0);
-    if(pad&PAD_START){InGame = 2;}
     
 
   }
