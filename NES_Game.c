@@ -130,11 +130,13 @@ typedef struct Objects {
 //---global variable---
 Objects shot[9];  	//number of bullets
 Objects lives[3];  	//number of lives 
+Objects arrow[1];  	//arrow
 int pLives = 3;   	//player's lives
 int pPoints = 0;	//player's points
 int shotinaction = 0;	//shout in action
 Actor actors;	// all actors
 Actor enemy1;	// all actors
+int InGame = 0; 
 
 int i;
 int iCount;
@@ -148,8 +150,8 @@ int iRand;
 
 void actors_setup()
 {
-  actor_x[0] = 50;
-  actor_y[0] = 100;
+  actor_x[0] = 120;
+  actor_y[0] = 35;
   actor_dx[0] = 0;
   actor_dy[0] = 0;
 }
@@ -207,20 +209,33 @@ void points_count()
 void setup_Shot()
 {
   if(lads == 1)
+  {
     shot[0].x = actor_x[0]+8;
-    if(lads == 2)
-      shot[0].x = actor_x[0] + 2;
-    if(lads == 3)
-      shot[0].y = actor_y[0];
-    if(lads == 4)
-      shot[0].y = actor_y[0]+8;
+    shot[0].y = actor_y[0];
+  }
+  if(lads == 2)  
+  {
+    shot[0].x = actor_x[0]+2;
+    shot[0].y = actor_y[0];
+  }
+  if(lads == 3)  
+  {
+    shot[0].x = actor_x[0];
+    shot[0].y = actor_y[0];
+  }
+  if(lads == 4)  
+  {
+    shot[0].x = actor_x[0];
+    shot[0].y = actor_y[0]+8;
+  }
     shot[0].state = 28;
     oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id);
 }
 void ShotUsed()
 {
-  if(shoutinaction == 1 && iCount <= 50)
+  if(shotinaction == 1 && iCount <= 50)
   {
+      
     if(lads == 1)
     {
       shot[0].y = shot[0].y - 2;
@@ -254,8 +269,8 @@ void ShotUsed()
   }
   else 
   {    
-      shot[0].x = actor_x[0];
-      shot[0].y = actor_y[0];
+      shot[0].x = 0;
+      shot[0].y = 0;
       shot[0].state = 0;
       oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id); 
   }
@@ -266,10 +281,10 @@ void enemy_action()
 
   if( enemy_x[0]!=actor_x[0] || enemy_y[0] != actor_y[0])
   {
-    if((shout[0].x >= enemy_x[0]-4 && shout[0].x <= enemy_x[0]+8)&& 
-       (shout[0].y >= enemy_y[0]-2 && shout[0].y <= enemy_y[0]+4)) 
+    if((shot[0].x >= enemy_x[0]-4 && shot[0].x <= enemy_x[0]+8)&& 
+       (shot[0].y >= enemy_y[0] && shot[0].y <= enemy_y[0]+12)) 
     {
-      shout[i].state = 0;
+      shot[i].state = 0;
       pPoints= pPoints + 1;
       enemy_setup();
     }
@@ -294,82 +309,110 @@ void enemy_action()
       enemy_setup();
     i=0;
   }
+  //-------------wall collision----------
+  if(enemy_x[0] <= 10 &&  enemy_x[0] != 216 )
+  {enemy_x[0] = 10;}
+  
+  if(enemy_x[0] >= 230 && enemy_x[0] != 10 )
+  {enemy_x[0] = 230;}
+  
+  if(enemy_y[0] <= 25 &&  enemy_y[0] != 191)
+  {enemy_y[0] = 25;}
+  
+  if(enemy_y[0] >= 191 &&  enemy_y[0] != 47)
+  {enemy_y[0] = 191;} 
   PlayersLives();
 }
 void player_action()
 {        
   pad = pad_poll(i);
+
   //if player has shot
   if (pad&PAD_A && shotinaction != 1){setup_Shot();shotinaction = 1;}
   
-  if (pad&PAD_UP)
+  if (pad&PAD_UP )
   {
     actor_dy[0]=-2;
-    actor_y[i] += actor_dy[i];    
-    oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun0);
+    actor_y[0] += actor_dy[0];    
+    oam_id = oam_meta_spr(actor_x[0], actor_y[0],  oam_id, playerRRun0);
     lad = 1;
-    if(shoutinaction != 1)lads = lad;
+    if(shotinaction != 1)lads = lad;
     
   }  
   else if (pad&PAD_DOWN)
   {
     actor_dy[0]=2;  
-    actor_y[i] += actor_dy[i];
-    oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun1);
+    actor_y[0] += actor_dy[0];
+    oam_id = oam_meta_spr(actor_x[0], actor_y[0],  oam_id, playerRRun1);
     lad = 2;
-    if(shoutinaction != 1)lads = lad;
+    if(shotinaction != 1)lads = lad;
     
   }     
   else if(pad&PAD_LEFT)
   {
     actor_dx[0]=-2;
-    actor_x[i] += actor_dx[i];
-    oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun2);
+    actor_x[0] += actor_dx[0];
+    oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun2);
     lad = 3;
-    if(shoutinaction != 1)lads = lad;
+    if(shotinaction != 1)lads = lad;
     
   }
   else if (pad&PAD_RIGHT)
   {
     actor_dx[0]=2;    
-    actor_x[i] += actor_dx[i];
-    oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun3);
+    actor_x[0] += actor_dx[0];
+    oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun3);
     lad = 4;
-    if(shoutinaction != 1)lads = lad;
+    if(shotinaction != 1)lads = lad;
 
   }
   else
   {
-    if(lad == 1)oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun0);
-    else if(lad == 2)oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun1);
-    else if(lad == 3)oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun2);
-    else if(lad == 4)oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun3);
-    else oam_id = oam_meta_spr(actor_x[i], actor_y[i], oam_id, playerRRun0);
+    if(lad == 1)oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun0);
+    else if(lad == 2)oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun1);
+    else if(lad == 3)oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun2);
+    else if(lad == 4)oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun3);
+    else oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun0);
   }
-  //-------------wall collision----------
-  if(actor_y[0] >= 25 &&  actor_y[0] != 185)
-  {
-    actor_dy[0] = - actor_dy[0];  
-  }
-  if(actor_y[0] <= 185 &&  actor_y[0] != 25)
-  {
-    actor_dy[0] = - actor_dy[0];
-  }
+    //-------------wall collision----------
+  if(actor_x[0] <= 10 &&  actor_x[0] != 216 )
+  {actor_x[0] = 10;}
+  
+  if(actor_x[0] >= 230 && actor_x[0] != 10 )
+  {actor_x[0] = 230;}
+  
+  if(actor_y[0] <= 25 &&  actor_y[0] != 191)
+  {actor_y[0] = 25;}
+  
+  if(actor_y[0] >= 191 &&  actor_y[0] != 47)
+  {actor_y[0] = 191;} 
 
   if (oam_id!=0) oam_hide_rest(oam_id);
   
   points_count();
 }
-
+void nextLevel()
+{
+  if(pPoints == 0)
+  {
+      arrow[0].x = 120;
+      arrow[0].y = 200;
+      arrow[0].state = 11;
+      oam_id = oam_spr(arrow[0].x, arrow[0].y, arrow[0].state, 5, oam_id);
+  }
+  
+  if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
+  {InGame = 3;} 
+}
 
 //------------------main Game loop--------------
 void game_loop()
 { 
-  ShoutUsed();
+  ShotUsed();
   enemy_action();
   player_action();  
+  nextLevel();
   ppu_wait_frame();     // ensure VRAM buffer is cleared
-  
   ppu_wait_nmi();
   vrambuf_clear();
   
@@ -423,8 +466,7 @@ void Start()
 }
 
 void main(void)
-{
-  int InGame = 0;  
+{ 
   int GameState = 1;
   int x = 0;   // x scroll position
   int y = 0;   // y scroll position
@@ -433,6 +475,8 @@ void main(void)
    //show_title_screen(Level_1E_pal, Level_1E_rle);
    //show_title_screen(Level_2E_pal, Level_2E_rle);
    //show_title_screen(Level_3E_pal, Level_3E_rle);
+  
+  InGame = 0; 
   iCount = 0;
   setup_graphics();
   Level_one(Level_1E_pal, Level_1E_rle,Level_2E_rle);
@@ -444,26 +488,37 @@ void main(void)
       case 0: 
         show_title_screen(Title_Screen_pal, Title_Screen_rle);        
         Start();        
-        actors_setup();
         //enemy_setup();
         InGame = 2;
         break;
       case 1:   
         oam_id = 0;  
-        ShoutUsed();
+        ShotUsed();
         game_loop();
         break;
       case 2: 
         
         show_title_screen(Level_1E_pal, Level_1E_rle);
-        setup_Shout();
+        setup_Shot();
         levelSetup();
+        
+        actors_setup();
         //oam_id = 0;
         enemy_setup();
         //game_loop();        
         InGame = 1;
 	break;
-      case 3: 
+      case 3:         
+        show_title_screen(Level_1E_pal, Level_2E_rle);
+        setup_Shot();
+        levelSetup();
+        
+        actors_setup();
+        //oam_id = 0;
+        enemy_setup();
+        //game_loop();        
+        InGame = 1;
+	break;
 
         break;
       case 4:  
