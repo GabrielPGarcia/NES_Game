@@ -196,7 +196,7 @@ void PlayersLives()
   else 
   {
     //if player has no lives left
-    
+
     InGame = 2;
   }
 }
@@ -281,25 +281,25 @@ void ShotUsed()
 }
 void enemy_setup(int w)
 {
-  if(w ==0)
+  if(w ==0 || w == 4)
   {
     enemy_x[w] = 1;
     enemy_y[w] = 126;
   } 
-  if(w == 1)
+  if(w == 1 || w == 5)
   {
     enemy_x[w] = 237;
     enemy_y[w] = 126;
   }
-  if(w == 2)
+  if(w == 2 || w == 6)
   {
     enemy_x[w] = 115;
     enemy_y[w] = 210;
   }
-  if(w == 3)
+  if(w == 3 || w == 7)
   {
-    enemy_x[w] = 115;
-    enemy_y[w] = 210;
+    enemy_x[w] = 112;
+    enemy_y[w] = 20;
   }
 }
 void level_CE(int q, int w);
@@ -465,20 +465,20 @@ void nextLevel()
 void set()
 {
 
-pPoints = 0;	//player's points
-ikills = 0;	//player's points
-shotinaction = 0;	//shout in action
-pLives = 3;
-ilevel = 0;
-iswich = 1;
-enemyt = 0;
-i=0;
-p=0;
-iCount=0; //time the shot last
-lad=0;
-lads=0;
+  pPoints = 0;	//player's points
+  ikills = 0;	//player's points
+  shotinaction = 0;	//shout in action
+  pLives = 3;
+  ilevel = 0;
+  iswich = 1;
+  enemyt = 0;
+  i=0;
+  p=0;
+  iCount=0; //time the shot last
+  lad=0;
+  lads=0;
 
-}
+} 
 //------------------main Game loop--------------
 void game_loop()
 { 
@@ -487,6 +487,9 @@ void game_loop()
   enemy_action(0);
   enemy_action(1);
   enemy_action(2);
+  if(ilevel > 0)
+    enemy_action(3);
+
   player_action();  
   nextLevel();
   ppu_wait_frame();     // ensure VRAM buffer is cleared
@@ -555,6 +558,16 @@ void Death()
   vram_write("[A] to start!", 12);
   ppu_on_all();
 }
+void qset()
+{
+  setup_Shot();
+  levelSetup();  
+  enemy_setup(0);
+  enemy_setup(1);
+  enemy_setup(2);
+  enemy_setup(3);
+  actors_setup(); 
+}
 void main(void)
 { 
   int GameState = 1;
@@ -584,7 +597,7 @@ void main(void)
         game_loop();
         break;
       case 2: 
-  	setup_graphics();
+        setup_graphics();
         show_title_screen(Title_Screen_pal, Title_Screen_rle);        
         Death();
         InGame = 10;
@@ -598,79 +611,81 @@ void main(void)
         enemy_setup(0);
         enemy_setup(1);
         enemy_setup(2);
+
         actors_setup();  
         InGame = 1;
         break;
       case 4:
         show_title_screen(Level_1E_pal, Level_2E_rle);
-        setup_Shot();
-        levelSetup();  
-
-        enemy_setup(0);
-        enemy_setup(1);
-        enemy_setup(2);
-        actors_setup();  
+        qset();
         InGame = 1;
         break;
       case 5:
         show_title_screen(Level_1E_pal, Level_3E_rle);
-        setup_Shot();
-        levelSetup();  
-
-        enemy_setup(0);
-        enemy_setup(1);
-        enemy_setup(2);
-        actors_setup();  
+        qset();
         InGame = 1;
         break;
       case 6:
         show_title_screen(Level_1E_pal, Level_4E_rle);
-        setup_Shot();
-        levelSetup();  
-
-        enemy_setup(0);
-        enemy_setup(1);
-        enemy_setup(2);
-        actors_setup();  
+        qset();
         InGame = 1;
         break;
       case 7:
         show_title_screen(Level_2E_pal, Level_2E_rle);
-        setup_Shot();
-        levelSetup();  
-
-        enemy_setup(0);
-        enemy_setup(1);
-        enemy_setup(2);
-        actors_setup();  
+        qset();
         InGame = 1;
         break;
       case 8:
         show_title_screen(Level_2E_pal, Level_3E_rle);
-        setup_Shot();
-        levelSetup();  
-
-        enemy_setup(0);
-        enemy_setup(1);
-        enemy_setup(2);
-        actors_setup();  
+        qset();
         InGame = 1;
         break;
       case 9:
         show_title_screen(Level_2E_pal, Level_4E_rle);
-        setup_Shot();
-        levelSetup();  
-
-        enemy_setup(0);
-        enemy_setup(1);
-        enemy_setup(2);
-        actors_setup();  
+        qset();
         InGame = 1;
         break;    
       case 10:
         set();
         InGame = 0;
+        break;     
+      case 11:        
+        show_title_screen(Level_1E_pal, Level_1E_rle);
+        qset();
+        InGame = 1;
+        InGame = 1;
         break;
+      case 12:
+        show_title_screen(Level_1E_pal, Level_2E_rle);
+        qset();
+        InGame = 1;
+        InGame = 1;
+        break;
+      case 13:
+        show_title_screen(Level_1E_pal, Level_3E_rle);
+        qset();
+        InGame = 1;
+        break;
+      case 14:
+        show_title_screen(Level_1E_pal, Level_4E_rle);
+        qset();
+        InGame = 1;
+        break;
+      case 15:
+        show_title_screen(Level_2E_pal, Level_2E_rle);
+        qset();
+        InGame = 1;
+        break;
+      case 16:
+        show_title_screen(Level_2E_pal, Level_3E_rle);
+        qset();
+        InGame = 1;
+        break;
+      case 17:
+        show_title_screen(Level_2E_pal, Level_4E_rle);
+        qset();
+        InGame = 1;
+        break;  
 
     }
   }
