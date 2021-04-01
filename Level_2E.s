@@ -5,7 +5,7 @@
 ;;{pal:"nes",layout:"nes"};;
 _Level_2E_pal:
  .byte $0F,$31,$1C,$30,$1C,$01,$21,$31
- .byte $1C,$16,$30,$06,$1C,$19,$29,$17
+ .byte $1C,$16,$30,$06,$1C,$31,$30,$06
  
 ;;
 ;;{w:32,h:30,bpp:8,comp:"rletag",map:"nesnt"};;
