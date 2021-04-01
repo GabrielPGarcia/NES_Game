@@ -162,14 +162,15 @@ int InGame = 0;
 int ilevel = 0;
 int iswich = 1;
 int enemyt = 0;
+int speed = 2;
 int i;
 int p;
 int iCount; //time the shot last
 char pad;	//controlls
 char oam_id;
 byte runseq;
-int lad=0;
-int lads=0;
+int lad=0;	//last action done
+int lads=0;	//last action done shot
 
 
 void actors_setup()
@@ -213,7 +214,7 @@ void PlayersLives()
   {
     //if player has no lives left
 
-    // InGame = 2;
+     InGame = 2;
   }
 }
 //prints points to top right
@@ -363,13 +364,14 @@ void level_C(int q);
 void player_action()
 {        
   pad = pad_poll(p);
-
+  if(ilevel >=5 && ilevel < 7)
+    speed = 1;
   //if player has shot
   if (pad&PAD_A && shotinaction != 1){setup_Shot();shotinaction = 1;}
 
   if (pad&PAD_UP )
   {
-    actor_dy[0]=-2;
+    actor_dy[0]=-speed;
     actor_y[0] += actor_dy[0];    
     oam_id = oam_meta_spr(actor_x[0], actor_y[0],  oam_id, playerRRun0);
     lad = 1;
@@ -378,7 +380,7 @@ void player_action()
   }  
   else if (pad&PAD_DOWN)
   {
-    actor_dy[0]=2;  
+    actor_dy[0]=speed;  
     actor_y[0] += actor_dy[0];
     oam_id = oam_meta_spr(actor_x[0], actor_y[0],  oam_id, playerRRun1);
     lad = 2;
@@ -387,7 +389,7 @@ void player_action()
   }     
   else if(pad&PAD_LEFT)
   {
-    actor_dx[0]=-2;
+    actor_dx[0]=-speed;
     actor_x[0] += actor_dx[0];
     oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun2);
     lad = 3;
@@ -396,7 +398,7 @@ void player_action()
   }
   else if (pad&PAD_RIGHT)
   {
-    actor_dx[0]=2;    
+    actor_dx[0]=speed;    
     actor_x[0] += actor_dx[0];
     oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun3);
     lad = 4;
