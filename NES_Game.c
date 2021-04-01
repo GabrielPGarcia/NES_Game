@@ -1,15 +1,4 @@
 
-#include "Level_4E.s"
-
-#include "Level_5E.s"
-
-#include "Level_6E.s"
-
-#include "Level_7E.s"
-
-#include "Level_8E.s"
-
-#include "Level_9E.s"
 #include <stdlib.h>
 #include <string.h>
 
@@ -48,7 +37,7 @@ extern const byte Level_3E_rle[];
 //#link "Level_2E.s"
 //#link "Level_3E.s"
 #define NUM_ACTORS 1
-#define NUM_ENEMY 15
+#define NUM_ENEMY 20
 
 
 #define DEF_METASPRITE_2x2(name,code,pal)\
@@ -151,8 +140,11 @@ Actor actors;	// all actors
 Actor enemy1;	// all actors
 int InGame = 0; 
 int ilevel = 1;
+int iswich = 1;
+int enemyt = 0;
 
 int i;
+int p;
 int iCount;
 char pad;
 char oam_id;
@@ -169,13 +161,6 @@ void actors_setup()
   actor_dx[0] = 0;
   actor_dy[0] = 0;
 }
-void enemy_setup()
-{
-  enemy_x[0] = 200;
-  enemy_y[0] = 100;
-  enemy_dx[0] = 0;
-  enemy_dy[0] = 0;
-}
 void setup_graphics() 
 {
   ppu_off();
@@ -185,12 +170,12 @@ void setup_graphics()
 }
 void Lives(int l,int k)
 {
-  
+
   lives[l].x = 55+k;
   lives[l].y = 7;
   lives[l].state = 14;
   oam_id = oam_spr(lives[l].x, lives[l].y, lives[l].state, 5, oam_id);
-  
+
 }
 void PlayersLives()
 {
@@ -242,14 +227,14 @@ void setup_Shot()
     shot[0].x = actor_x[0];
     shot[0].y = actor_y[0]+8;
   }
-    shot[0].state = 28;
-    oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id);
+  shot[0].state = 28;
+  oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id);
 }
 void ShotUsed()
 {
   if(shotinaction == 1 && iCount <= 50)
   {
-      
+
     if(lads == 1)
     {
       shot[0].y = shot[0].y - 2;
@@ -283,72 +268,94 @@ void ShotUsed()
   }
   else 
   {    
-      shot[0].x = 0;
-      shot[0].y = 0;
-      shot[0].state = 0;
-      oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id); 
+    shot[0].x = 120;
+    shot[0].y = 0;
+    shot[0].state = 0;
+    oam_id = oam_spr(shot[0].x, shot[0].y, shot[0].state, 4, oam_id); 
   }
 
 }
-void enemy_action()
-{ 
-
-  if( enemy_x[0]!=actor_x[0] || enemy_y[0] != actor_y[0])
+void enemy_setup(int w)
+{
+    if(w ==0)
+    {
+      enemy_x[w] = 1;
+      enemy_y[w] = 126;
+    } 
+    if(w == 1)
+    {
+      enemy_x[w] = 237;
+      enemy_y[w] = 126;
+    }
+    if(w == 2)
+    {
+      enemy_x[w] = 115;
+      enemy_y[w] = 210;
+    }
+    if(w == 3)
+    {
+      enemy_x[w] = 115;
+      enemy_y[w] = 210;
+    }
+}
+void enemy_action(int w)
+{
+  if( enemy_x[w] != actor_x[0] || enemy_y[w] != actor_y[0])
   {
-    if((shot[0].x >= enemy_x[0]-4 && shot[0].x <= enemy_x[0]+8)&& 
-       (shot[0].y >= enemy_y[0] && shot[0].y <= enemy_y[0]+12)) 
+    if((shot[0].x >= enemy_x[w]-4 && shot[0].x <= enemy_x[w]+8)&& 
+       (shot[0].y >= enemy_y[w] && shot[0].y <= enemy_y[w]+12)) 
     {
       shot[i].state = 0;
       pPoints= pPoints + 1;
       ikills = ikills + 1;
-      enemy_setup();
+      enemy_setup(w);
     }
-    if(actor_x[0] > enemy_x[0]){
-      enemy_x[0] = enemy_x[0] + 1;
-      oam_id = oam_meta_spr(enemy_x[0], enemy_y[0], oam_id, EnemyM2R);}
-    else if(actor_x[0] < enemy_x[0]){
-      enemy_x[0] = enemy_x[0] - 1;
-      oam_id = oam_meta_spr(enemy_x[0], enemy_y[0], oam_id, EnemyM2L);}
-    else if(actor_y[0] > enemy_y[0]){
-      enemy_y[0] = enemy_y[0] + 1;
-      oam_id = oam_meta_spr(enemy_x[0], enemy_y[0], oam_id, EnemyM2D);}
-    else if(actor_y[0] < enemy_y[0]){
-      enemy_y[0] = enemy_y[0] - 1;
-      oam_id = oam_meta_spr(enemy_x[0], enemy_y[0], oam_id, EnemyM2U);}
+    if(actor_x[0] > enemy_x[w]){
+      enemy_x[w] = enemy_x[w] + 1;
+      oam_id = oam_meta_spr(enemy_x[w], enemy_y[w], oam_id, EnemyM2R);}
+    else if(actor_x[0] < enemy_x[w]){
+      enemy_x[w] = enemy_x[w] - 1;
+      oam_id = oam_meta_spr(enemy_x[w], enemy_y[w], oam_id, EnemyM2L);}
+    else if(actor_y[0] > enemy_y[w]){
+      enemy_y[w] = enemy_y[w] + 1;
+      oam_id = oam_meta_spr(enemy_x[w], enemy_y[w], oam_id, EnemyM2D);}
+    else if(actor_y[0] < enemy_y[w]){
+      enemy_y[w] = enemy_y[w] - 1;
+      oam_id = oam_meta_spr(enemy_x[w], enemy_y[w], oam_id, EnemyM2U);}
 
   }
-    else
+  else
   {
     //take damage
-      pLives = pLives - 1;
-      if(pPoints != 0)
-       pPoints= pPoints/2;
-      else
-        pPoints=0;
-      enemy_setup();
-    i=0;
+    enemy_setup(w);
+    pLives = pLives - 1;
+    if(pPoints != 0)
+      pPoints= pPoints/2;
+    else
+      pPoints=0;
   }
   //-------------wall collision----------
   if(enemy_x[0] <= 10 &&  enemy_x[0] != 216 )
   {enemy_x[0] = 10;}
-  
+
   if(enemy_x[0] >= 230 && enemy_x[0] != 10 )
   {enemy_x[0] = 230;}
-  
+
   if(enemy_y[0] <= 25 &&  enemy_y[0] != 191)
   {enemy_y[0] = 25;}
-  
+
   if(enemy_y[0] >= 191 &&  enemy_y[0] != 47)
   {enemy_y[0] = 191;} 
   PlayersLives();
 }
+void level_C(int q);
 void player_action()
 {        
-  pad = pad_poll(i);
+  pad = pad_poll(p);
 
   //if player has shot
   if (pad&PAD_A && shotinaction != 1){setup_Shot();shotinaction = 1;}
-  
+
   if (pad&PAD_UP )
   {
     actor_dy[0]=-2;
@@ -356,7 +363,7 @@ void player_action()
     oam_id = oam_meta_spr(actor_x[0], actor_y[0],  oam_id, playerRRun0);
     lad = 1;
     if(shotinaction != 1)lads = lad;
-    
+
   }  
   else if (pad&PAD_DOWN)
   {
@@ -365,7 +372,7 @@ void player_action()
     oam_id = oam_meta_spr(actor_x[0], actor_y[0],  oam_id, playerRRun1);
     lad = 2;
     if(shotinaction != 1)lads = lad;
-    
+
   }     
   else if(pad&PAD_LEFT)
   {
@@ -374,7 +381,7 @@ void player_action()
     oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun2);
     lad = 3;
     if(shotinaction != 1)lads = lad;
-    
+
   }
   else if (pad&PAD_RIGHT)
   {
@@ -393,58 +400,49 @@ void player_action()
     else if(lad == 4)oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun3);
     else oam_id = oam_meta_spr(actor_x[0], actor_y[0], oam_id, playerRRun0);
   }
-    //-------------wall collision----------
-  if(actor_x[0] <= 10 &&  actor_x[0] != 216 )
-  {actor_x[0] = 10;}
-  
-  if(actor_x[0] >= 230 && actor_x[0] != 10 )
-  {actor_x[0] = 230;}
-  
-  if(actor_y[0] <= 25 &&  actor_y[0] != 191)
-  {actor_y[0] = 25;}
-  
-  if(actor_y[0] >= 191 &&  actor_y[0] != 47)
-  {actor_y[0] = 191;} 
+
+  level_C(2);
 
   if (oam_id!=0) oam_hide_rest(oam_id);
-  
+
   points_count();
 }
 void nextLevel()
 {
   if(ikills > 50 && ilevel == 1)
   {
-      arrow[0].x = 120;
-      arrow[0].y = 200;
-      arrow[0].state = 11;
-      oam_id = oam_spr(arrow[0].x, arrow[0].y, arrow[0].state, 5, oam_id);  if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
-      {InGame = 3;ilevel = 2;} 
-    
+    arrow[0].x = 120;
+    arrow[0].y = 200;
+    arrow[0].state = 11;
+    oam_id = oam_spr(arrow[0].x, arrow[0].y, arrow[0].state, 5, oam_id);  
+    if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
+    {InGame = 3;ilevel = 2;} 
+
   }  
   if(ikills > 150 && ilevel == 2)
   {
-      arrow[0].x = 120;
-      arrow[0].y = 200;
-      arrow[0].state = 11;
-      oam_id = oam_spr(arrow[0].x, arrow[0].y, arrow[0].state, 5, oam_id);  if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
-      {InGame = 4;ilevel = 3;} 
-    
+    arrow[0].x = 120;
+    arrow[0].y = 200;
+    arrow[0].state = 11;
+    oam_id = oam_spr(arrow[0].x, arrow[0].y, arrow[0].state, 5, oam_id);  
+    if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
+    {InGame = 4;ilevel = 3;} 
   }
-  
-
 }
-
 //------------------main Game loop--------------
 void game_loop()
 { 
   ShotUsed();
-  enemy_action();
+  
+  //enemy_action(0);
+  //enemy_action(1);
+  //enemy_action(2);
   player_action();  
   nextLevel();
   ppu_wait_frame();     // ensure VRAM buffer is cleared
   ppu_wait_nmi();
   vrambuf_clear();
-  
+
 }
 
 void show_title_screen(const byte* pal, const byte* rle) {
@@ -452,35 +450,21 @@ void show_title_screen(const byte* pal, const byte* rle) {
   ppu_off();
   // set palette, virtual bright to 0 (total black)
   pal_bg(pal);
-  
+
   // unpack nametable into the VRAM
   vram_adr(0x2000);
   vram_unrle(rle);
   // enable rendering
   ppu_on_all();
 }
-// function to scroll window up and down until end
-void Level_one(const byte* pal, const byte* rle,const byte* rle2) {
-  // disable rendering
-  ppu_off();
-  // set palette, virtual bright to 0 (total black)
-  pal_bg(pal);
-  
-  // unpack nametable into the VRAM
-  vram_adr(0x2000);
-  vram_unrle(rle);
-  vram_adr(0x2400);
-  vram_unrle(rle2);
-  // enable rendering
-  ppu_on_all();
-}
+
 void levelSetup()
 {
   vram_adr(NTADR_A(1,1)); 
   vram_write("Lives:", 6);  
   vram_adr(NTADR_A(20,1)); 
   vram_write("Points:", 7);
-  
+
 }
 
 void Start()
@@ -490,7 +474,7 @@ void Start()
   vram_write("The", 3);
   vram_adr(NTADR_A(10,13));
   vram_write("Exterminator", 12);
-  
+
   vram_adr(NTADR_A(10,17));
   vram_write("[A] to start!", 12);
   ppu_on_all();
@@ -502,12 +486,11 @@ void main(void)
   int x = 0;   // x scroll position
   int y = 0;   // y scroll position
   int dx = 1;  // y scroll direction
-  
+
   InGame = 0; 
   iCount = 0;
   setup_graphics();
-  Level_one(Level_1E_pal, Level_1E_rle,Level_2E_rle);
-  // infinite loop
+
   show_title_screen(Title_Screen_pal, Title_Screen_rle);        
   Start();     
   while(1) 
@@ -515,11 +498,11 @@ void main(void)
     switch(InGame)
     {
       case 0: 
-        
-         pad = pad_trigger(0);
-         if(pad&PAD_START){InGame = 2;}
+
+        pad = pad_trigger(0);
+        if(pad&PAD_START){InGame = 2;}
         //enemy_setup();
-        //InGame = 2;
+        InGame = 3;
         break;
       case 1:   
         oam_id = 0;  
@@ -527,20 +510,23 @@ void main(void)
         game_loop();
         break;
       case 2: 
-        
+
         show_title_screen(Level_1E_pal, Level_1E_rle);
         setup_Shot();
-        levelSetup();        
-        actors_setup();
-        enemy_setup();    
+        levelSetup();  
+
+        //enemy_setup(0);
+        //enemy_setup(1);
+        //enemy_setup(2);
+        actors_setup();  
         InGame = 1;
-	break;
+        break;
       case 3:         
         show_title_screen(Level_1E_pal, Level_2E_rle);
         setup_Shot();
         levelSetup();
         actors_setup();
-        enemy_setup();   
+        //enemy_setup();   
         InGame = 1;
         break;
       case 4:  
@@ -548,16 +534,127 @@ void main(void)
         setup_Shot();
         levelSetup();        
         actors_setup();
-        enemy_setup();     
+        //enemy_setup();     
+        InGame = 1;
+        break;     
+      case 5:  
+        show_title_screen(Level_1E_pal, Level_3E_rle);
+        setup_Shot();
+        levelSetup();        
+        actors_setup();
+        // enemy_setup();     
         InGame = 1;
         break;
-        
-    }
-       // x += dx;
-        //scroll(x, y);   
-    
-    
+      case 6:  
+        show_title_screen(Level_1E_pal, Level_3E_rle);
+        setup_Shot();
+        levelSetup();        
+        actors_setup();
+        //enemy_setup();     
+        InGame = 1;
+        break;
+      case 7:         
+        show_title_screen(Level_1E_pal, Level_2E_rle);
+        setup_Shot();
+        levelSetup();
+        actors_setup();
+        //enemy_setup();   
+        InGame = 1;
+        break;
+      case 8:  
+        show_title_screen(Level_1E_pal, Level_3E_rle);
+        setup_Shot();
+        levelSetup();        
+        actors_setup();
+        //enemy_setup();     
+        InGame = 1;
+        break;     
+      case 9:  
+        show_title_screen(Level_1E_pal, Level_3E_rle);
+        setup_Shot();
+        levelSetup();        
+        actors_setup();
+        // enemy_setup();     
+        InGame = 1;
+        break;
+      case 10:  
+        show_title_screen(Level_1E_pal, Level_3E_rle);
+        setup_Shot();
+        levelSetup();        
+        actors_setup();
+        //enemy_setup();     
+        InGame = 1;
+        break;
+    }   
+
 
   }
 
+}
+void level_C(int q)
+{  
+  //-------------wall collision----------
+  if(enemy_x[0] <= 10 &&  enemy_x[0] != 216 )
+  {enemy_x[0] = 10;}
+
+  if(enemy_x[0] >= 230 && enemy_x[0] != 10 )
+  {enemy_x[0] = 230;}
+
+  if(enemy_y[0] <= 25 &&  enemy_y[0] != 191)
+  {enemy_y[0] = 25;}
+
+  if(enemy_y[0] >= 191 &&  enemy_y[0] != 47)
+  {enemy_y[0] = 191;} 
+  //-------------wall collision----------
+  if(actor_x[0] <= 10 &&  actor_x[0] != 216 )
+  {actor_x[0] = 10;}
+
+  if(actor_x[0] >= 230 && actor_x[0] != 10 )
+  {actor_x[0] = 230;}
+
+  if(actor_y[0] <= 25 &&  actor_y[0] != 191)
+  {actor_y[0] = 25;}
+
+  if(actor_y[0] >= 191 &&  actor_y[0] != 47)
+  {actor_y[0] = 191;} 
+
+  if(q == 2)
+  {
+    //-------------level 2 wall collision----------
+    if((actor_y[0] >= 128 &&  actor_y[0] <= 144 )&&  (actor_x[0] >= 56 && actor_x[0] <=107))//bot left top
+    {actor_y[0] = actor_y[0]-2;}
+
+    if((actor_y[0] >= 144 && actor_y[0] <= 158) &&  (actor_x[0] >= 56 && actor_x[0] <=107))//bot left bot
+    {actor_y[0] = actor_y[0]+2;}   
+    
+    if((actor_y[0] >= 128 &&  actor_y[0] <= 144 )&&  (actor_x[0] >= 138 && actor_x[0] <=184))//bot right top
+    {actor_y[0] = actor_y[0]-2;}
+    if((actor_y[0] >= 144 && actor_y[0] <= 158) &&  (actor_x[0] >= 138 && actor_x[0] <=184))//bot right bot
+    {actor_y[0] = actor_y[0]+2;}
+
+    if((actor_y[0] >= 128 && actor_y[0] <= 158) &&  (actor_x[0] >= 100 && actor_x[0] <=109))
+    {actor_x[0] = actor_x[0]+2;}
+
+    if((actor_y[0] >= 128 && actor_y[0] <= 158) &&  (actor_x[0] >= 54 && actor_x[0] <=66))
+     {actor_x[0] = actor_x[0]-2;}
+    if((actor_y[0] >= 128 && actor_y[0] <= 158) &&  (actor_x[0] >= 137 && actor_x[0] <=138))
+    {actor_x[0] = actor_x[0]+2;}
+
+    if((actor_y[0] >= 128 && actor_y[0] <= 158) &&  (actor_x[0] >= 137 && actor_x[0] <=138))
+    {actor_x[0] = actor_x[0]+2;}
+    
+    if((actor_y[0] >= 42 &&  actor_y[0] <= 58 )&&  (actor_x[0] >= 56 && actor_x[0] <=88))
+    {actor_y[0] = actor_y[0]-2;}
+
+    if((actor_y[0] >= 58 && actor_y[0] <= 66) &&  (actor_x[0] >= 72 && actor_x[0] <=88))
+    {actor_y[0] = actor_y[0]+2;}   
+    if((actor_y[0] >= 90 && actor_y[0] <= 98) &&  (actor_x[0] >= 56 && actor_x[0] <=72))
+    {actor_y[0] = actor_y[0]+2;} 
+    
+    if((actor_y[0] >= 128 &&  actor_y[0] <= 144 )&&  (actor_x[0] >= 138 && actor_x[0] <=184))
+    {actor_y[0] = actor_y[0]-2;}
+    if((actor_y[0] >= 144 && actor_y[0] <= 158) &&  (actor_x[0] >= 138 && actor_x[0] <=184))
+    {actor_y[0] = actor_y[0]+2;}
+
+  }
 }
