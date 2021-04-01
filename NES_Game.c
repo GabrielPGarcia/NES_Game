@@ -468,7 +468,7 @@ void set()
 pPoints = 0;	//player's points
 ikills = 0;	//player's points
 shotinaction = 0;	//shout in action
-pLives = 0;
+pLives = 3;
 ilevel = 0;
 iswich = 1;
 enemyt = 0;
@@ -584,6 +584,7 @@ void main(void)
         game_loop();
         break;
       case 2: 
+  	setup_graphics();
         show_title_screen(Title_Screen_pal, Title_Screen_rle);        
         Death();
         InGame = 10;
