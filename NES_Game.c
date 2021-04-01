@@ -548,8 +548,8 @@ void Death()
 
   vram_adr(NTADR_A(10,14));
   vram_write("Level :", 7);
-  if(pPoints >=10) oam_id = oam_spr(160, 111, (pPoints/10%10)+48, 6, oam_id);
-  oam_id = oam_spr(168, 111, (pPoints%10)+48, 6, oam_id);
+  if(ilevel >=10) oam_id = oam_spr(160, 111, (ilevel/10%10)+48, 6, oam_id);
+  oam_id = oam_spr(168, 111, (ilevel%10)+48, 6, oam_id);
 
   vram_adr(NTADR_A(10,17));
   vram_write("[A] to start!", 12);
@@ -574,7 +574,7 @@ void main(void)
     {
       case 0: 
         pad = pad_trigger(0);
-        if(pad&PAD_START){InGame = 2;}
+        if(pad&PAD_START){InGame = 3;}
         //enemy_setup();
         ///InGame = 3;
         break;
@@ -586,7 +586,7 @@ void main(void)
       case 2: 
         show_title_screen(Title_Screen_pal, Title_Screen_rle);        
         Death();
-        InGame = 3;
+        InGame = 10;
         //death sean
         break;
       case 3:        
