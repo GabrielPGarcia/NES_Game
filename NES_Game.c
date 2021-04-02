@@ -18,6 +18,16 @@
 #include "vrambuf.h"
 //#link "vrambuf.c"
 
+//#link "famitone2.s"
+void __fastcall__ famitone_update(void);
+//#link "music_aftertherain.s"
+extern char after_the_rain_music_data[]; 
+//------------------------Music-------- 
+//#link "music_dangerstreets.s"  
+extern char danger_streets_music_data[];  
+//#link "demosounds.s"  
+extern char demo_sounds[]; 
+
 extern const byte Title_Screen_pal[16];
 extern const byte Title_Screen_rle[];
 
@@ -221,6 +231,8 @@ void PlayersLives()
 void points_count()
 {  
   if(pPoints<=0)pPoints=0;//if points is less then 0 keep it 0
+  if(pPoints >=10000) oam_id = oam_spr(202, 7, (pPoints/10000%10)+48, 6, oam_id);  
+  if(pPoints >=1000) oam_id = oam_spr(210, 7, (pPoints/1000%10)+48, 6, oam_id);
   if(pPoints >=100) oam_id = oam_spr(218, 7, (pPoints/100%10)+48, 6, oam_id);
   if(pPoints >=10) oam_id = oam_spr(224, 7, (pPoints/10%10)+48, 6, oam_id);
   oam_id = oam_spr(230, 7, (pPoints%10)+48, 6, oam_id);
@@ -364,8 +376,9 @@ void level_C(int q);
 void player_action()
 {        
   pad = pad_poll(p);
-  if(ilevel >=5 && ilevel < 7)
+  if((ilevel >=5 && ilevel < 7)|| (ilevel >= 11))
     speed = 1;
+  else if(ilevel >= 8 && ilevel < 10)speed = 2;
   //if player has shot
   if (pad&PAD_A && shotinaction != 1){setup_Shot();shotinaction = 1;}
 
@@ -430,74 +443,74 @@ void tsetup()
 }
 void nextLevel()
 {
-  if(ikills > 1 && ilevel == 0)
+  if(ikills >= 20 && ilevel == 0)
   {
     tsetup();
     if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 4;ilevel = 2;} 
 
   }  
-  if(ikills > 5 && ilevel == 2)
+  if(ikills >= 50 && ilevel == 2)
   {
     tsetup(); if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 5;ilevel = 3;} 
   }  
-  if(ikills > 10 && ilevel == 3)
+  if(ikills >= 90 && ilevel == 3)
   {
     tsetup();if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 6;ilevel = 4;} 
 
   }  
-  if(ikills > 15 && ilevel == 4)
+  if(ikills >= 130 && ilevel == 4)
   {
     tsetup();if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 7;ilevel = 5;} 
   }
-  if(ikills > 20 && ilevel == 5)
+  if(ikills >= 160 && ilevel == 5)
   {
     tsetup();if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 8;ilevel = 6;} 
 
   }  
-  if(ikills > 25 && ilevel == 6)
+  if(ikills >= 190 && ilevel == 6)
   {
     tsetup();if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 9;ilevel = 7;} 
   }
-  if(ikills > 30 && ilevel == 7)
+  if(ikills >= 220 && ilevel == 7)
   {
     tsetup();if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 11;ilevel = 8;} 
 
   }  
-  if(ikills > 35 && ilevel == 8)
+  if(ikills >= 260 && ilevel == 8)
   {
     tsetup();if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 12;ilevel = 9;} 
   }  
-  if(ikills > 40 && ilevel == 9)
+  if(ikills >= 300 && ilevel == 9)
   {
     tsetup();if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 13;ilevel = 10;} 
 
   }  
-  if(ikills > 45 && ilevel == 10)
+  if(ikills >= 350 && ilevel == 10)
   {
     tsetup();if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 14;ilevel = 11;} 
   }
-  if(ikills > 50 && ilevel == 11)
+  if(ikills >= 400 && ilevel == 11)
   {
     tsetup(); if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 15;ilevel = 12;} 
 
   }  
-  if(ikills > 55 && ilevel == 12)
+  if(ikills >= 450 && ilevel == 12)
   {
     tsetup();if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 16;ilevel = 13;} 
   }
-  if(ikills > 60 && ilevel == 13)
+  if(ikills >= 500 && ilevel == 13)
   {
     tsetup();if(actor_y[0] >= 190 &&  actor_y[0] != 47 &&  actor_x[0] >= 100 && actor_x[0] <=130)
     {InGame = 17;ilevel = 14;} 
@@ -524,12 +537,20 @@ void set()
 void game_loop()
 { 
   ShotUsed();
-
+  if((ilevel == 0 && ikills <=20) ||(ilevel == 2 && ikills <=50)||
+    (ilevel == 3 && ikills <=90) ||(ilevel == 4 && ikills <=130)||
+     (ilevel == 5 && ikills <=160) ||(ilevel == 6 && ikills <=190)||
+    (ilevel == 7 && ikills <=220) ||(ilevel == 8 && ikills <=260)||
+     (ilevel == 9 && ikills <=300) ||(ilevel == 10 && ikills <=350)||
+    (ilevel == 11 && ikills <=400) ||(ilevel == 12 && ikills <=450)||
+     (ilevel == 13 && ikills <=500) ||ilevel == 13)
+  {
   enemy_action(0);
   enemy_action(1);
   enemy_action(2);
   if(ilevel > 0)
     enemy_action(3);
+  }
 
   player_action();  
   nextLevel();
@@ -544,6 +565,7 @@ void show_title_screen(const byte* pal, const byte* rle) {
   ppu_off();
   // set palette, virtual bright to 0 (total black)
   pal_bg(pal);
+  
 
   // unpack nametable into the VRAM
   vram_adr(0x2000);
@@ -554,10 +576,13 @@ void show_title_screen(const byte* pal, const byte* rle) {
 
 void levelSetup()
 {
+  ppu_off();
+   
   vram_adr(NTADR_A(1,1)); 
   vram_write("Lives:", 6);  
   vram_adr(NTADR_A(20,1)); 
   vram_write("Points:", 7);
+  ppu_on_all();
 
 }
 
@@ -578,14 +603,17 @@ void Death()
   ppu_off();
   vram_adr(NTADR_A(10,12));
   vram_write("Kills :", 7);
-
+  
+  if(ikills >=1000) oam_id = oam_spr(144, 103, (pPoints/1000%10)+48, 6, oam_id);
   if(ikills >=100) oam_id = oam_spr(152, 95, (ikills/100%10)+48, 6, oam_id);
   if(ikills >=10) oam_id = oam_spr(160, 95, (ikills/10%10)+48, 6, oam_id);
   oam_id = oam_spr(168, 95, (ikills%10)+48, 6, oam_id);
 
   vram_adr(NTADR_A(10,13));
-  vram_write("Points :", 8);
+  vram_write("Points:", 7);
 
+
+  if(pPoints >=1000) oam_id = oam_spr(144, 103, (pPoints/1000%10)+48, 6, oam_id);
   if(pPoints >=100) oam_id = oam_spr(152, 103, (pPoints/100%10)+48, 6, oam_id);
   if(pPoints >=10) oam_id = oam_spr(160, 103, (pPoints/10%10)+48, 6, oam_id);
   oam_id = oam_spr(168, 103, (pPoints%10)+48, 6, oam_id);
@@ -601,35 +629,39 @@ void Death()
 }
 void qset()
 {
-  setup_Shot();
-  levelSetup();  
+  setup_Shot(); 
   enemy_setup(0);
   enemy_setup(1);
   enemy_setup(2);
   enemy_setup(3);
   actors_setup(); 
+  
 }
 void main(void)
 { 
   int GameState = 1;
-  int x = 0;   // x scroll position
-  int y = 0;   // y scroll position
-  int dx = 1;  // y scroll direction
-
-  InGame = 0; 
-  iCount = 0;
+   set();
+  
+  levelSetup(); 
   setup_graphics();
 
 
+  famitone_init(danger_streets_music_data);
+  //sfx_init(demo_sounds);
+  nmi_set_callback(famitone_update);
+  music_play(0);
   show_title_screen(Title_Screen_pal, Title_Screen_rle);        
   Start();     
+
   while(1) 
   {   
+    
     switch(InGame)
     {
       case 0: 
+        
         pad = pad_trigger(0);
-        if(pad&PAD_START){InGame = 3;}
+        if(pad&PAD_START){InGame = 3;  levelSetup(); }
         //enemy_setup();
         ///InGame = 3;
         break;
@@ -648,6 +680,7 @@ void main(void)
       case 3:        
         show_title_screen(Level_1E_pal, Level_1E_rle);
         setup_Shot();
+        levelSetup();
         levelSetup();  
 
         enemy_setup(0);
@@ -660,31 +693,37 @@ void main(void)
       case 4:
         show_title_screen(Level_1E_pal, Level_2E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;
       case 5:
         show_title_screen(Level_1E_pal, Level_3E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;
       case 6:
         show_title_screen(Level_1E_pal, Level_4E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;
       case 7:
         show_title_screen(Level_2E_pal, Level_2E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;
       case 8:
         show_title_screen(Level_2E_pal, Level_3E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;
       case 9:
         show_title_screen(Level_2E_pal, Level_4E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;    
       case 10:
@@ -694,36 +733,43 @@ void main(void)
       case 11:        
         show_title_screen(Level_1E_pal, Level_5E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;
       case 12:
         show_title_screen(Level_1E_pal, Level_6E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;
       case 13:
         show_title_screen(Level_1E_pal, Level_7E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;
       case 14:
         show_title_screen(Level_2E_pal, Level_5E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;
       case 15:
         show_title_screen(Level_2E_pal, Level_6E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;
       case 16:
         show_title_screen(Level_2E_pal, Level_7E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;
       case 17:
         show_title_screen(Level_2E_pal, Level_8E_rle);
         qset();
+        levelSetup();
         InGame = 1;
         break;  
 
