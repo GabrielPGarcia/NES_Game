@@ -380,6 +380,7 @@ void player_action()
     speed = 1;
   else if(ilevel >= 8 && ilevel < 10)speed = 2;
   //if player has shot
+  
   if (pad&PAD_A && shotinaction != 1){setup_Shot();shotinaction = 1;}
 
   if (pad&PAD_UP )
